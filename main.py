@@ -167,6 +167,8 @@ def main(args):
         results.write(str(user_id))
         results.write(':')
 
+        suggested_repos.sort()
+
         results.write(','.join([str(repo) for repo in suggested_repos]))
         results.write('\n')
 
