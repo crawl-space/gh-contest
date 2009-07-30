@@ -213,17 +213,16 @@ def suggest_repos(repos, users, target_user):
     similar_users = set()
 
     for repo in target_user.watching:
-        if len(suggestions.suggested_repos) > 10:
+        if len(suggestions.suggested_repos) > 10 :
             break
-        for child in repo.forked_by:
-            suggestions.add(child)
+#        for child in repo.forked_by:
+#            suggestions.add(child)
         if repo.forked_from != None:
             suggestions.add(repo.forked_from)
 
     for repo in target_user.watching:
-        if len(suggestions.suggested_repos) > 10:
+        if len(suggestions.suggested_repos) > 10 :
             break
-
         for users_repo in repo.owner.owns:
             suggestions.add(users_repo)
 
@@ -292,6 +291,7 @@ def main(args):
 
         results.write(','.join([str(x.id) for x in suggested_repos]))
         results.write('\n')
+        results.flush()
 
     print "\nDone"
     test.close()
