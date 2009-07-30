@@ -215,10 +215,10 @@ def suggest_repos(repos, users, target_user):
     for repo in target_user.watching:
         if len(suggestions.suggested_repos) > 10 :
             break
-#        for child in repo.forked_by:
-#            suggestions.add(child)
         if repo.forked_from != None:
             suggestions.add(repo.forked_from)
+        for child in repo.forked_by:
+            suggestions.add(child)
 
     for repo in target_user.watching:
         if len(suggestions.suggested_repos) > 10 :
