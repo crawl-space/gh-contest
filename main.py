@@ -181,34 +181,38 @@ def load_data(args):
     return users, repos, popular_repos
 
 
+class Suggestions(object):
+
+    def __init__(self, user):
+        self.user = user
+        self.suggested_repos = []
+
+    def add(self, repo):
+        if repo not in self.user.watching and repo not in self.suggested_repos:
+            self.suggested_repos.append(repo)
+
+
 def suggest_repos(repos, users, target_user):
-    suggested_repos = []
+    suggestions = Suggestions(target_user)
     similar_users = set()
 
     for repo in target_user.watching:
-        if len(suggested_repos) > 10:
+        if len(suggestions.suggested_repos) > 10:
             break
         for child in repo.forked_by:
-            if child not in target_user.watching and \
-                    child not in suggested_repos:
-                        suggested_repos.append(child)
+            suggestions.add(child)
         if repo.forked_from != None:
-            parent = repo.forked_from
-            if parent not in target_user.watching and \
-                    parent not in suggested_repos:
-                        suggested_repos.append(parent)
+            suggestions.add(repo.forked_from)
 
     watched_users = [x.owner for x in target_user.watching]
     for watched_user in watched_users:
-        if len(suggested_repos) > 10:
+        if len(suggestions.suggested_repos) > 10:
             break
         users_repos = [x for x in repos.values() if x.owner == watched_user]
         for users_repo in users_repos:
-            if users_repo not in target_user.watching and \
-                    users_repo not in suggested_repos:
-                        suggested_repos.append(users_repo)
+            suggestions.add(users_repo)
 
-    return suggested_repos[:10]
+    return suggestions.suggested_repos[:10]
 #        for user in repo.watched_by:
 #            if user is not target_user:
 #                similar_users.add(user)
