@@ -22,6 +22,7 @@ class Repo(IdBase):
 
         self.name = None
         self.forked_from = None
+        self.forked_by = []
         self.langs = []
 
     def is_watched_by(self, user):
@@ -126,6 +127,7 @@ def main(args):
 
         if len(parts) > 2:
             repo.forked_from = repos[int(parts[2])]
+            repo.forked_from.forked_by.append(repo)
 
     repo_txt.close()
 
