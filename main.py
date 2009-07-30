@@ -52,6 +52,7 @@ def suggest_repos(repos, users, target_user):
 def main(args):
     users = {}
     repos = {}
+    popular_repos = []
 
     print "Loading user to repo map"
 
@@ -64,6 +65,7 @@ def main(args):
     for line in data.readlines():
         cur += 1
         sys.stdout.write("\r%3d%%" % (cur/total * 100))
+        sys.stdout.flush()
 
         user_id, repo_id = line.strip().split(':')
 
@@ -89,6 +91,9 @@ def main(args):
     print "\nDone"
     data.close()
 
+    print "Ordering repos by popularity"
+    popular_repos = sorted(repos.values(), reverse=True, key=lambda x: len(x.watched_by))
+
     print "Processing test users"
     test = open(args[1], 'r')
     results = open(args[2], 'w')
@@ -100,15 +105,19 @@ def main(args):
     for line in test.readlines():
         cur += 1
         sys.stdout.write("\r%3d%%" % (cur/total * 100))
+        sys.stdout.flush()
 
         user_id = int(line.strip())
 
         if not user_id in users:
-            print "\nuser %d not found. skipping" % user_id
-            continue
+            print "\nuser %d not found. suggesting popular repos" % user_id
+            suggested_repos = [x.id for x in popular_repos[:10]]
+        else:
+            user = users[user_id]
+            suggested_repos = suggest_repos(repos, users, user)
 
-        user = users[user_id]
-        suggested_repos = suggest_repos(repos, users, user)
+            if len(suggested_repos) != 10:
+                suggested_repos += [x.id for x in popular_repos[:10 - len(suggested_repos)]]
 
         results.write(str(user_id))
         results.write(':')
