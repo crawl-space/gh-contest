@@ -116,8 +116,8 @@ def main(args):
             user = users[user_id]
             suggested_repos = suggest_repos(repos, users, user)
 
-#            if len(suggested_repos) != 10:
-#                suggested_repos += [x.id for x in popular_repos[:10 - len(suggested_repos)]]
+            if len(suggested_repos) != 10:
+                suggested_repos += [x.id for x in popular_repos[:10 - len(suggested_repos)]]
 
         results.write(str(user_id))
         results.write(':')
