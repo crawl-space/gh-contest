@@ -256,9 +256,6 @@ def suggest_repos(repos, popular_repos, users, target_user):
         if len(suggestions.suggested_repos) >= 10:
             return suggestions.suggested_repos
 
-
-    fav_langs = set(target_user.favourite_langs)
-    
     watched_owners = [x.owner for x in target_user.watching]
     watched_owners = set(watched_owners)
     owned_by_watched_users = set()
@@ -267,15 +264,11 @@ def suggest_repos(repos, popular_repos, users, target_user):
     owned_by_watched_users = list(owned_by_watched_users)
     owned_by_watched_users.sort(key=lambda x: x.popularity, reverse=True)
     for repo in owned_by_watched_users:
-        if len(fav_langs) > 0 and len(repo.lang_names) > 0:
-            lang_names = repo.lang_names
-            if len(fav_langs.intersection(lang_names)) < 1:
-                continue
-
         suggestions.add(repo)
         if len(suggestions.suggested_repos) >= 10:
             return suggestions.suggested_repos
 
+    fav_langs = set(target_user.favourite_langs)
     for popular_repo in popular_repos:
         if not suggestions.could_add(popular_repo):
             continue
