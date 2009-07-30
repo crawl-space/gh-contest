@@ -2,7 +2,19 @@
 
 import sys
 
-class Repo(object):
+class IdBase(object):
+
+    def __hash__(self):
+        return self.id
+
+    def __eq__(self, other):
+        return self.id == other.id
+
+    def __cmp__(self, other):
+        return cmp(self.id, other.id)
+
+
+class Repo(IdBase):
 
     def __init__(self, id):
         self.id = id
@@ -16,7 +28,7 @@ class Repo(object):
         self.watched_by.add(user)
 
 
-class User(object):
+class User(IdBase):
 
     def __init__(self, id):
         self.id = id
@@ -53,7 +65,7 @@ def suggest_repos(repos, users, target_user):
     suggested_repos_sorted = sorted(suggested_repos.items(), key=lambda x: x[1],
             reverse=True)
 
-    return [x[0].id for x in suggested_repos_sorted[:10]]
+    return [x[0] for x in suggested_repos_sorted[:10]]
 
 
 def main(args):
@@ -154,7 +166,7 @@ def main(args):
 
         if not user_id in users:
             print "\nuser %d not found. suggesting popular repos" % user_id
-            suggested_repos = [x.id for x in popular_repos[:10]]
+            suggested_repos = popular_repos[:10]
         else:
             user = users[user_id]
             suggested_repos = suggest_repos(repos, users, user)
@@ -162,9 +174,9 @@ def main(args):
             popular = 0
             remaining_slots = 10 - len(suggested_repos)
             while remaining_slots > 0:
-                while popular_repos[popular].id in suggested_repos:
+                while popular_repos[popular] in suggested_repos:
                     popular += 1
-                suggested_repos.append(popular_repos[popular].id)
+                suggested_repos.append(popular_repos[popular])
                 remaining_slots -= 1
 
         results.write(str(user_id))
@@ -172,7 +184,7 @@ def main(args):
 
         suggested_repos.sort()
 
-        results.write(','.join([str(repo) for repo in suggested_repos]))
+        results.write(','.join([str(x.id) for x in suggested_repos]))
         results.write('\n')
 
     print "\nDone"
