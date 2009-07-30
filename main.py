@@ -92,7 +92,8 @@ def main(args):
     data.close()
 
     print "Ordering repos by popularity"
-    popular_repos = sorted(repos.values(), reverse=True, key=lambda x: len(x.watched_by))
+    popular_repos = sorted(repos.values(), reverse=True,
+            key=lambda x: len(x.watched_by))
 
     print "Processing test users"
     test = open(args[1], 'r')
@@ -116,8 +117,13 @@ def main(args):
             user = users[user_id]
             suggested_repos = suggest_repos(repos, users, user)
 
-            if len(suggested_repos) != 10:
-                suggested_repos += [x.id for x in popular_repos[:10 - len(suggested_repos)]]
+            popular = 0
+            remaining_slots = 10 - len(suggested_repos)
+            while remaining_slots > 0:
+                while popular_repos[popular].id in suggested_repos:
+                    popular += 1
+                suggested_repos.append(popular_repos[popular].id)
+                remaining_slots -= 1
 
         results.write(str(user_id))
         results.write(':')
