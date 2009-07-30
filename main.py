@@ -212,13 +212,12 @@ def suggest_repos(repos, users, target_user):
     suggestions = Suggestions(target_user)
     similar_users = set()
 
-    for repo in target_user.watching:
-        if len(suggestions.suggested_repos) > 10 :
-            break
-        if repo.forked_from != None:
-            suggestions.add(repo.forked_from)
-        for child in repo.forked_by:
-            suggestions.add(child)
+    parents = [repo.forked_from for repo in target_user.watching \
+            if repo.forked_from != None]
+    parents = set(parents)
+
+    for parent in parents:
+        suggestions.add(parent)
 
     for repo in target_user.watching:
         if len(suggestions.suggested_repos) > 10 :
