@@ -38,12 +38,23 @@ class Repo(IdBase):
         self.forked_by = []
         self.langs = []
 
+        self._lang_names = None
+
     def is_watched_by(self, user):
         self.watched_by.add(user)
 
     @property
     def popularity(self):
         return len(self.watched_by)
+
+    @property
+    def lang_names(self):
+        if not self._lang_names:
+            names = [x[0] for x in self.langs]
+            self._lang_names = set(names)
+
+        return self._lang_names
+
 
 class User(IdBase):
 
@@ -52,11 +63,29 @@ class User(IdBase):
         self.watching = set()
         self.similar_users = set()
 
+        self._favourite_langs = None
+
     def is_watching(self, repo):
         self.watching.add(repo)
 
     def similar_to(self, similarity):
         self.similar_users.add(similarity)
+
+    @property
+    def favourite_langs(self):
+        if not self._favourite_langs:
+            langs = {}
+            for repo in self.watching:
+                for lang in repo.langs:
+                    if lang[0] not in langs:
+                        langs[lang[0]] = 0
+                    langs[lang[0]] = lang[1]
+
+            favs = langs.items()
+            favs.sort(reverse=True, key=lambda x: x[1])
+            self._favourite_langs = [x[0] for x in favs]
+
+        return self._favourite_langs
 
 
 class UserSimilarity(object):
@@ -277,11 +306,23 @@ def main(args):
 
         suggested_repos = suggest_repos(repos, users, user)
 
+        fav_langs = set(user.favourite_langs)
         popular = 0
         remaining_slots = 10 - len(suggested_repos)
         while remaining_slots > 0:
-            while popular_repos[popular] in suggested_repos:
-                popular += 1
+            while True:
+                if popular_repos[popular] in suggested_repos:
+                    popular += 1
+                elif len(fav_langs) > 0 and \
+                        len(popular_repos[popular].lang_names) > 0:
+                    lang_names = popular_repos[popular].lang_names
+                    if len(fav_langs.intersection(lang_names)) < 1:
+                        popular += 1
+                    else:
+                        break
+                else:
+                    break
+
             suggested_repos.append(popular_repos[popular])
             remaining_slots -= 1
 
