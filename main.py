@@ -44,10 +44,8 @@ def suggest_repos(repos, users, target_user):
 
     for repo in target_user.watching:
         for user in repo.watched_by:
-            similar_users.add(user)
-
-
-    similar_users.remove(target_user)
+            if user is not target_user:
+                similar_users.add(user)
 
     for similar_user in similar_users:
         if len(target_user.watching.intersection(similar_user.watching)) < 4:
@@ -166,18 +164,19 @@ def main(args):
 
         if not user_id in users:
             print "\nuser %d not found. suggesting popular repos" % user_id
-            suggested_repos = popular_repos[:10]
+            user = User(user_id)
         else:
             user = users[user_id]
-            suggested_repos = suggest_repos(repos, users, user)
 
-            popular = 0
-            remaining_slots = 10 - len(suggested_repos)
-            while remaining_slots > 0:
-                while popular_repos[popular] in suggested_repos:
-                    popular += 1
-                suggested_repos.append(popular_repos[popular])
-                remaining_slots -= 1
+        suggested_repos = suggest_repos(repos, users, user)
+
+        popular = 0
+        remaining_slots = 10 - len(suggested_repos)
+        while remaining_slots > 0:
+            while popular_repos[popular] in suggested_repos:
+                popular += 1
+            suggested_repos.append(popular_repos[popular])
+            remaining_slots -= 1
 
         results.write(str(user_id))
         results.write(':')
