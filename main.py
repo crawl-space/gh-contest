@@ -6,6 +6,7 @@ import time
 from ghcontest import load_data, suggest_repos
 from ghcontest.models import User
 
+
 def main(args):
     start_time = time.time()
     users, repos, popular_repos = load_data(args)
