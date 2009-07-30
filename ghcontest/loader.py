@@ -1,10 +1,12 @@
 #!/usr/bin/python
 
 import sys
+import time
 
 from models import User, Repo, RepoOwner
 
 def load_data(args):
+    start_time = time.time()
     users = {}
     repos = {}
     popular_repos = []
@@ -13,15 +15,7 @@ def load_data(args):
 
     data = open(args[0], 'r')
 
-    # cheating on total number here ;)
-    total = 440237.0
-    cur = 0
-
     for line in data.readlines():
-        cur += 1
-        sys.stdout.write("\r%3d%%" % (cur/total * 100))
-        sys.stdout.flush()
-
         user_id, repo_id = line.strip().split(':')
 
         user_id = int(user_id)
@@ -42,13 +36,12 @@ def load_data(args):
 
         repo.is_watched_by(user)
         user.is_watching(repo)
-
-    print "\nDone"
+    
     data.close()
 
     print "Ordering repos by popularity"
     popular_repos = sorted(repos.values(), reverse=True,
-            key=lambda x: len(x.watched_by))
+            key=lambda x: x.popularity)
 
     owners = {}
     print "Reading repo details"
@@ -94,5 +87,7 @@ def load_data(args):
             repo.langs.append((lang_name, int(count)))
 
     lang.close()
+
+    print "Data read in %d seconds" % (time.time() - start_time)
 
     return users, repos, popular_repos

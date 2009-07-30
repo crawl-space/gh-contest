@@ -36,13 +36,16 @@ class Repo(IdBase):
         self.langs = []
 
         self._lang_names = None
+        self._popularity = None
 
     def is_watched_by(self, user):
         self.watched_by.add(user)
 
     @property
     def popularity(self):
-        return len(self.watched_by)
+        if not self._popularity:
+            self._popularity = len(self.watched_by)
+        return self._popularity
 
     @property
     def lang_names(self):

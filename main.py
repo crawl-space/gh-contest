@@ -1,30 +1,23 @@
 #!/usr/bin/python
 
 import sys
+import time
 
 from ghcontest import load_data, suggest_repos
 from ghcontest.models import User
 
 def main(args):
+    start_time = time.time()
     users, repos, popular_repos = load_data(args)
 
     print "Processing test users"
     test = open(args[3], 'r')
     results = open(args[4], 'w')
 
-    # cheating again
-    total = 4788.0
-    cur = 0
-
     for line in test.readlines():
-        cur += 1
-        sys.stdout.write("\r%3d%%" % (cur/total * 100))
-        sys.stdout.flush()
-
         user_id = int(line.strip())
 
         if not user_id in users:
-            print "\nuser %d not found. suggesting popular repos" % user_id
             user = User(user_id)
         else:
             user = users[user_id]
@@ -38,11 +31,10 @@ def main(args):
 
         results.write(','.join([str(x.id) for x in suggested_repos]))
         results.write('\n')
-        results.flush()
 
-    print "\nDone"
     test.close()
     results.close()
+    print "Done in %d seconds" % (time.time() - start_time)
 
 
 if __name__ == "__main__":
