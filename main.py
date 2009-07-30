@@ -1,7 +1,6 @@
 #!/usr/bin/python
 
 import sys
-import cerealizer
 
 
 class IdBase(object):
@@ -20,12 +19,20 @@ class IdBase(object):
         return cmp(self.id, other.id)
 
 
+class RepoOwner(object):
+
+    def __init__(self, name):
+        self.name = name
+        self.owns = set()
+
+
 class Repo(IdBase):
 
     def __init__(self, id):
         self.id = id
         self.watched_by = set()
 
+        self.owner = None
         self.name = None
         self.forked_from = None
         self.forked_by = []
@@ -130,6 +137,7 @@ def load_data(args):
     popular_repos = sorted(repos.values(), reverse=True,
             key=lambda x: len(x.watched_by))
 
+    owners = {}
     print "Reading repo details"
     repo_txt = open(args[1], 'r')
     for line in repo_txt.readlines():
@@ -139,8 +147,16 @@ def load_data(args):
 
         repo = repos[id]
 
-        repo.owner, repo.name = parts[0].split('/', 1)
+        owner, repo.name = parts[0].split('/', 1)
         repo.creation_date = parts[1]
+
+        if owner in owners:
+            repo.owner = owners[owner]
+        else:
+            repo.owner = RepoOwner(owner)
+            owners[owner] = repo.owner
+
+        repo.owner.owns.add(repo)
 
         if len(parts) > 2:
             repo.forked_from = repos[int(parts[2])]
@@ -208,8 +224,7 @@ def suggest_repos(repos, users, target_user):
     for watched_user in watched_users:
         if len(suggestions.suggested_repos) > 10:
             break
-        users_repos = [x for x in repos.values() if x.owner == watched_user]
-        for users_repo in users_repos:
+        for users_repo in x.owner.owns:
             suggestions.add(users_repo)
 
     return suggestions.suggested_repos[:10]
