@@ -10,9 +10,13 @@ class IdBase(object):
         return self.id
 
     def __eq__(self, other):
+        if other is None:
+            return False
         return self.id == other.id
 
     def __cmp__(self, other):
+        if other is None:
+            return 1
         return cmp(self.id, other.id)
 
 
@@ -178,31 +182,45 @@ def load_data(args):
 
 
 def suggest_repos(repos, users, target_user):
-    suggested_repos = {}
+    suggested_repos = []
     similar_users = set()
 
     for repo in target_user.watching:
-        for user in repo.watched_by:
-            if user is not target_user:
-                similar_users.add(user)
-
-    for similar_user in similar_users:
-        if len(target_user.watching.intersection(similar_user.watching)) < 4:
-            continue
-
-        possible_repos = target_user.watching - similar_user.watching
-
-        for repo in possible_repos:
-            if repo not in suggested_repos:
-                suggested_repos[repo] = 0
-
-            suggested_repos[repo] += 1
+        if len(suggested_repos) > 10:
+            break
+        for child in repo.forked_by:
+            if child not in target_user.watching and \
+                    child not in suggested_repos:
+                        suggested_repos.append(child)
+        if repo.forked_from != None:
+            parent = repo.forked_from
+            if parent not in target_user.watching and \
+                    parent not in suggested_repos:
+                        suggested_repos.append(parent)
 
 
-    suggested_repos_sorted = sorted(suggested_repos.items(), key=lambda x: x[1],
-            reverse=True)
+    return suggested_repos[:10]
+#        for user in repo.watched_by:
+#            if user is not target_user:
+#                similar_users.add(user)
 
-    return [x[0] for x in suggested_repos_sorted[:10]]
+#    for similar_user in similar_users:
+#        if len(target_user.watching.intersection(similar_user.watching)) < 4:
+#            continue
+#
+#       possible_repos = target_user.watching - similar_user.watching
+#
+#        for repo in possible_repos:
+#            if repo not in suggested_repos:
+#                suggested_repos[repo] = 0
+#
+#            suggested_repos[repo] += 1
+#
+#
+#    suggested_repos_sorted = sorted(suggested_repos.items(), key=lambda x: x[1],
+#            reverse=True)
+#
+#    return [x[0] for x in suggested_repos_sorted[:10]]
 
 
 def main(args):
