@@ -38,6 +38,9 @@ def suggest_repos(repos, users, target_user):
     similar_users.remove(target_user)
 
     for similar_user in similar_users:
+        if len(target_user.watching.intersection(similar_user.watching)) < 2:
+            continue
+
         possible_repos = target_user.watching - similar_user.watching
 
         for repo in possible_repos:
