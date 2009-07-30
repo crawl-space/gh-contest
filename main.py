@@ -239,6 +239,41 @@ class Suggestions(object):
         if repo not in self.user.watching and repo not in self.suggested_repos:
             self.suggested_repos.append(repo)
 
+class OrderedList(object):
+
+    def __init__(self):
+        self.elements = {}
+
+    def add(self, x):
+        if x not in self.elements:
+            self.elements[x] = 0
+        self.elements[x] += 1
+
+    def as_list(self):
+        items = self.elements.items()
+        items.sort(reverse=True, key=lambda x: x[1])
+        return [x[0] for x in items]
+
+    def as_groupings(self):
+        groupings = []
+
+        if len(self.elements) == 0:
+            return groupings
+
+        items = self.elements.items()
+        items.sort(reverse=True, key=lambda x: x[1])
+
+        i = items[0][1]
+        grouping = []
+        for item in items:
+            if item[1] == i:
+                grouping.append(item[0])
+            else:
+                i = item[1]
+                groupings.append(grouping)
+                grouping = []
+
+        return groupings
 
 def suggest_repos(repos, users, target_user):
     suggestions = Suggestions(target_user)
@@ -250,15 +285,17 @@ def suggest_repos(repos, users, target_user):
     for parent in parents:
         suggestions.add(parent)
 
-    watched_owners = [x.owner for x in target_user.watching]
-    watched_owners = set(watched_owners)
-    owned_by_watched_users = set()
-    for watched_owner in watched_owners:
-        owned_by_watched_users.update(watched_owner.owns)
-    owned_by_watched_users = list(owned_by_watched_users)
-    owned_by_watched_users.sort(key=lambda x: x.popularity, reverse=True)
-    for repo in owned_by_watched_users:
-        suggestions.add(repo)
+    watched_owners = OrderedList()
+    for watching in target_user.watching:
+        watched_owners.add(watching.owner)
+    watched_owners_groups = watched_owners.as_groupings()
+    for watched_owners_group in watched_owners_groups:
+        owned_repos = []
+        for watched_owner in watched_owners_group:
+            owned_repos += watched_owner.owns
+        owned_repos.sort(key=lambda x: x.popularity, reverse=True)
+        for repo in owned_repos:
+            suggestions.add(repo)
 
     return suggestions.suggested_repos[:10]
 #        for user in repo.watched_by:
