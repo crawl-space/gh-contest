@@ -41,6 +41,9 @@ class Repo(IdBase):
     def is_watched_by(self, user):
         self.watched_by.add(user)
 
+    @property
+    def popularity(self):
+        return len(self.watched_by)
 
 class User(IdBase):
 
@@ -214,6 +217,7 @@ def suggest_repos(repos, users, target_user):
 
     parents = [repo.forked_from for repo in target_user.watching \
             if repo.forked_from != None]
+    parents.sort(key=lambda x: x.popularity, reverse=True)
     for parent in parents:
         suggestions.add(parent)
 
