@@ -26,7 +26,7 @@ class User(object):
         self.watching.add(repo)
 
 
-def suggest_repos(repos, users, target_user):
+def suggest_repos(repos, users, target_user, num_repos):
     suggested_repos = {}
     similar_users = set()
 
@@ -53,7 +53,7 @@ def suggest_repos(repos, users, target_user):
     suggested_repos_sorted = sorted(suggested_repos.items(), key=lambda x: x[1],
             reverse=True)
 
-    return [x[0].id for x in suggested_repos_sorted[:10]]
+    return [x[0].id for x in suggested_repos_sorted[:num_repos]]
 
 
 def main(args):
@@ -157,7 +157,14 @@ def main(args):
             suggested_repos = [x.id for x in popular_repos[:10]]
         else:
             user = users[user_id]
-            suggested_repos = suggest_repos(repos, users, user)
+
+            if len(user.watching) >= 10:
+                suggested_repos = []
+            else:
+                suggested_repos = suggest_repos(repos, users, user,
+                        10 - len(user.watching))
+
+            suggested_repos += [x.id for x in user.watching][:10]
 
             popular = 0
             remaining_slots = 10 - len(suggested_repos)
