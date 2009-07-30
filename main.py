@@ -235,12 +235,16 @@ class Suggestions(object):
         self.user = user
         self.suggested_repos = []
 
+    def could_add(self, repo):
+        return repo not in self.user.watching and \
+                repo not in self.suggested_repos
+
     def add(self, repo):
-        if repo not in self.user.watching and repo not in self.suggested_repos:
+        if self.could_add(repo):
             self.suggested_repos.append(repo)
 
 
-def suggest_repos(repos, users, target_user):
+def suggest_repos(repos, popular_repos, users, target_user):
     suggestions = Suggestions(target_user)
     similar_users = set()
 
@@ -249,6 +253,8 @@ def suggest_repos(repos, users, target_user):
     parents.sort(key=lambda x: x.popularity, reverse=True)
     for parent in parents:
         suggestions.add(parent)
+        if len(suggestions.suggested_repos) >= 10:
+            return suggestions.suggested_repos
 
     watched_owners = [x.owner for x in target_user.watching]
     watched_owners = set(watched_owners)
@@ -259,6 +265,26 @@ def suggest_repos(repos, users, target_user):
     owned_by_watched_users.sort(key=lambda x: x.popularity, reverse=True)
     for repo in owned_by_watched_users:
         suggestions.add(repo)
+        if len(suggestions.suggested_repos) >= 10:
+            return suggestions.suggested_repos
+
+    fav_langs = set(target_user.favourite_langs)
+    popular = 0
+    while len(suggestions.suggested_repos) <= 10:
+        while True:
+            if not suggestions.could_add(popular_repos[popular]):
+                popular += 1
+            elif len(fav_langs) > 0 and \
+                    len(popular_repos[popular].lang_names) > 0:
+                lang_names = popular_repos[popular].lang_names
+                if len(fav_langs.intersection(lang_names)) < 1:
+                    popular += 1
+                else:
+                    break
+            else:
+                break
+
+        suggestions.add(popular_repos[popular])
 
     return suggestions.suggested_repos[:10]
 #        for user in repo.watched_by:
@@ -308,27 +334,7 @@ def main(args):
         else:
             user = users[user_id]
 
-        suggested_repos = suggest_repos(repos, users, user)
-
-        fav_langs = set(user.favourite_langs)
-        popular = 0
-        remaining_slots = 10 - len(suggested_repos)
-        while remaining_slots > 0:
-            while True:
-                if popular_repos[popular] in suggested_repos:
-                    popular += 1
-                elif len(fav_langs) > 0 and \
-                        len(popular_repos[popular].lang_names) > 0:
-                    lang_names = popular_repos[popular].lang_names
-                    if len(fav_langs.intersection(lang_names)) < 1:
-                        popular += 1
-                    else:
-                        break
-                else:
-                    break
-
-            suggested_repos.append(popular_repos[popular])
-            remaining_slots -= 1
+        suggested_repos = suggest_repos(repos, popular_repos, users, user)
 
         results.write(str(user_id))
         results.write(':')
