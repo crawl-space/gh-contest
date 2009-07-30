@@ -1,6 +1,8 @@
 #!/usr/bin/python
 
 import sys
+import cerealizer
+
 
 class IdBase(object):
 
@@ -34,40 +36,51 @@ class User(IdBase):
     def __init__(self, id):
         self.id = id
         self.watching = set()
+        self.similar_users = set()
 
     def is_watching(self, repo):
         self.watching.add(repo)
 
+    def similar_to(self, similarity):
+        self.similar_users.add(similarity)
 
-def suggest_repos(repos, users, target_user):
-    suggested_repos = {}
+
+class UserSimilarity(object):
+
+    def __init__(self, user1, user2):
+        self.users = (user1, user2)
+        self.common_repos = set()
+
+    def __hash__(self):
+        return self.users[0].id ^ self.users[1].id
+
+    def __eq__(self, other):
+        return self.users[0] in other.users and self.users[1] in other.users
+
+
+def find_similar_users(target_user, users):
     similar_users = set()
 
     for repo in target_user.watching:
         for user in repo.watched_by:
-            if user is not target_user:
-                similar_users.add(user)
+            if user is not target_user and user.id > target_user.id:
+                similarity = UserSimilarity(target_user, user)
+                # May have already done this user from another common repo
+                if similarity not in target_user.similar_users:
+                    similarity.common_repos = \
+                            target_user.watching.intersection(user.watching)
+                    target_user.similar_to(similarity)
+                    user.similar_to(similarity)
 
-    for similar_user in similar_users:
-        if len(target_user.watching.intersection(similar_user.watching)) < 4:
-            continue
+class Context(object):
 
-        possible_repos = target_user.watching - similar_user.watching
-
-        for repo in possible_repos:
-            if repo not in suggested_repos:
-                suggested_repos[repo] = 0
-
-            suggested_repos[repo] += 1
-
-
-    suggested_repos_sorted = sorted(suggested_repos.items(), key=lambda x: x[1],
-            reverse=True)
-
-    return [x[0] for x in suggested_repos_sorted[:10]]
+    def __init__(self, users, repos, popular_repos):
+        self.users = users
+        self.repos = repos
+        self.popular_repos = popular_repos
 
 
-def main(args):
+def load_data(args):
     users = {}
     repos = {}
     popular_repos = []
@@ -122,7 +135,7 @@ def main(args):
 
         repo = repos[id]
 
-        repo.name = parts[0]
+        repo.owner, repo.name = parts[0].split('/', 1)
         repo.creation_date = parts[1]
 
         if len(parts) > 2:
@@ -148,6 +161,52 @@ def main(args):
             repo.langs.append((lang_name, int(count)))
 
     lang.close()
+
+#    print "Matching up similar users"
+#    sorted_users = users.values()
+#    sorted_users.sort()
+#    total = len(sorted_users)
+#    cur = 0
+#    for user in sorted_users:
+#        cur += 1
+#        sys.stdout.write("\r%d / %d - %3d%%" % (cur, total, cur/total * 100))
+#        sys.stdout.flush()
+#
+#        find_similar_users(user, users)        
+
+    return users, repos, popular_repos
+
+
+def suggest_repos(repos, users, target_user):
+    suggested_repos = {}
+    similar_users = set()
+
+    for repo in target_user.watching:
+        for user in repo.watched_by:
+            if user is not target_user:
+                similar_users.add(user)
+
+    for similar_user in similar_users:
+        if len(target_user.watching.intersection(similar_user.watching)) < 4:
+            continue
+
+        possible_repos = target_user.watching - similar_user.watching
+
+        for repo in possible_repos:
+            if repo not in suggested_repos:
+                suggested_repos[repo] = 0
+
+            suggested_repos[repo] += 1
+
+
+    suggested_repos_sorted = sorted(suggested_repos.items(), key=lambda x: x[1],
+            reverse=True)
+
+    return [x[0] for x in suggested_repos_sorted[:10]]
+
+
+def main(args):
+    users, repos, popular_repos = load_data(args)
 
     print "Processing test users"
     test = open(args[3], 'r')
