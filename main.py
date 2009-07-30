@@ -198,6 +198,15 @@ def suggest_repos(repos, users, target_user):
                     parent not in suggested_repos:
                         suggested_repos.append(parent)
 
+    watched_users = [x.owner for x in target_user.watching]
+    for watched_user in watched_users:
+        if len(suggested_repos) > 10:
+            break
+        users_repos = [x for x in repos.values() if x.owner == watched_user]
+        for users_repo in users_repos:
+            if users_repo not in target_user.watching and \
+                    users_repo not in suggested_repos:
+                        suggested_repos.append(users_repo)
 
     return suggested_repos[:10]
 #        for user in repo.watched_by:
