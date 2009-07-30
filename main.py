@@ -8,6 +8,10 @@ class Repo(object):
         self.id = id
         self.watched_by = set()
 
+        self.name = None
+        self.forked_from = None
+        self.langs = []
+
     def is_watched_by(self, user):
         self.watched_by.add(user)
 
@@ -95,9 +99,44 @@ def main(args):
     popular_repos = sorted(repos.values(), reverse=True,
             key=lambda x: len(x.watched_by))
 
+    print "Reading repo details"
+    repo_txt = open(args[1], 'r')
+    for line in repo_txt.readlines():
+        id, other = line.strip().split(':')
+        id = int(id)
+        parts = other.split(',')
+
+        repo = repos[id]
+
+        repo.name = parts[0]
+        repo.creation_date = parts[1]
+
+        if len(parts) > 2:
+            repo.forked_from = repos[int(parts[2])]
+
+    repo_txt.close()
+
+    print "Reading repo language"
+    lang = open(args[2], 'r')
+    for line in lang.readlines():
+        id, other = line.strip().split(':')
+        id = int(id)
+        
+        if id not in repos:
+            continue
+
+        parts = other.split(',')
+
+        repo = repos[id]
+        for part in parts:
+            lang_name, count = part.split(';')
+            repo.langs.append((lang_name, int(count)))
+
+    lang.close()
+
     print "Processing test users"
-    test = open(args[1], 'r')
-    results = open(args[2], 'w')
+    test = open(args[3], 'r')
+    results = open(args[4], 'w')
 
     # cheating again
     total = 4788.0
