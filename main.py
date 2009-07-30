@@ -269,24 +269,20 @@ def suggest_repos(repos, popular_repos, users, target_user):
             return suggestions.suggested_repos
 
     fav_langs = set(target_user.favourite_langs)
-    popular = 0
-    while len(suggestions.suggested_repos) <= 10:
-        while True:
-            if not suggestions.could_add(popular_repos[popular]):
-                popular += 1
-            elif len(fav_langs) > 0 and \
-                    len(popular_repos[popular].lang_names) > 0:
-                lang_names = popular_repos[popular].lang_names
-                if len(fav_langs.intersection(lang_names)) < 1:
-                    popular += 1
-                else:
-                    break
-            else:
-                break
+    for popular_repo in popular_repos:
+        if not suggestions.could_add(popular_repo):
+            continue
+        elif len(fav_langs) > 0 and len(popular_repo.lang_names) > 0:
+            lang_names = popular_repo.lang_names
+            if len(fav_langs.intersection(lang_names)) < 1:
+                continue
 
-        suggestions.add(popular_repos[popular])
+        suggestions.add(popular_repo)
+        if len(suggestions.suggested_repos) >= 10:
+            return suggestions.suggested_repos
 
-    return suggestions.suggested_repos[:10]
+    # something went wrong
+    return []
 #        for user in repo.watched_by:
 #            if user is not target_user:
 #                similar_users.add(user)
