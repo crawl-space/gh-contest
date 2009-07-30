@@ -210,8 +210,7 @@ def load_data(args):
         repo = repos[id]
         for part in parts:
             lang_name, count = part.split(';')
-            if lang_name != "Shell":
-                repo.langs.append((lang_name, int(count)))
+            repo.langs.append((lang_name, int(count)))
 
     lang.close()
 
