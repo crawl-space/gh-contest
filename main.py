@@ -221,10 +221,11 @@ def suggest_repos(repos, users, target_user):
             suggestions.add(repo.forked_from)
 
     watched_users = [x.owner for x in target_user.watching]
-    for watched_user in watched_users:
+    for repo in target_user.watching:
         if len(suggestions.suggested_repos) > 10:
             break
-        for users_repo in x.owner.owns:
+
+        for users_repo in repo.owner.owns:
             suggestions.add(users_repo)
 
     return suggestions.suggested_repos[:10]
