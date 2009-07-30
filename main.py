@@ -220,7 +220,6 @@ def suggest_repos(repos, users, target_user):
         if repo.forked_from != None:
             suggestions.add(repo.forked_from)
 
-    watched_users = [x.owner for x in target_user.watching]
     for repo in target_user.watching:
         if len(suggestions.suggested_repos) > 10:
             break
