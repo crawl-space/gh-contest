@@ -214,8 +214,6 @@ def suggest_repos(repos, users, target_user):
 
     parents = [repo.forked_from for repo in target_user.watching \
             if repo.forked_from != None]
-    parents = set(parents)
-
     for parent in parents:
         suggestions.add(parent)
 
