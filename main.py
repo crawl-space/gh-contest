@@ -250,11 +250,15 @@ def suggest_repos(repos, users, target_user):
     for parent in parents:
         suggestions.add(parent)
 
-    for repo in target_user.watching:
-        if len(suggestions.suggested_repos) > 10 :
-            break
-        for users_repo in repo.owner.owns:
-            suggestions.add(users_repo)
+    watched_owners = [x.owner for x in target_user.watching]
+    watched_owners = set(watched_owners)
+    owned_by_watched_users = set()
+    for watched_owner in watched_owners:
+        owned_by_watched_users.update(watched_owner.owns)
+    owned_by_watched_users = list(owned_by_watched_users)
+    owned_by_watched_users.sort(key=lambda x: x.popularity, reverse=True)
+    for repo in owned_by_watched_users:
+        suggestions.add(repo)
 
     return suggestions.suggested_repos[:10]
 #        for user in repo.watched_by:
