@@ -49,6 +49,10 @@ def load_data(args):
     for line in repo_txt.readlines():
         id, other = line.strip().split(':')
         id = int(id)
+
+        if id not in repos:
+            continue
+
         parts = other.split(',')
 
         repo = repos[id]
@@ -64,7 +68,7 @@ def load_data(args):
 
         repo.owner.owns.add(repo)
 
-        if len(parts) > 2:
+        if len(parts) > 2 and int(parts[2]) in repos:
             repo.forked_from = repos[int(parts[2])]
             repo.forked_from.forked_by.append(repo)
 
