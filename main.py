@@ -24,12 +24,9 @@ def main(args):
             user = users[user_id]
 
         suggested_repos = suggest_repos(repos, popular_repos, users, user)
-
-        results.write(str(user_id))
-        results.write(':')
-
         suggested_repos.sort()
 
+        results.write('%d:' % user.id)
         results.write(','.join([str(x.id) for x in suggested_repos]))
         results.write('\n')
 
