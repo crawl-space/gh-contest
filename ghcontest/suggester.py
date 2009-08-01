@@ -32,7 +32,7 @@ def suggest_repos(repos, popular_repos, users, target_user):
     owned_by_watched_users = set()
     for watched_owner in watched_owners:
         owned_by_watched_users.update(watched_owner.owns)
-    owned_by_watched_users = list(owned_by_watched_users)
+    owned_by_watched_users = [x for x in owned_by_watched_users]
     owned_by_watched_users.sort(key=lambda x: x.popularity, reverse=True)
     for repo in owned_by_watched_users:
         suggestions.add(repo)
