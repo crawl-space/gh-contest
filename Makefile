@@ -11,3 +11,6 @@ run-dummy: test-data
 
 eval-dummy: run-dummy
 	python evaluate-results.py dummy/target.txt results-dummy.txt
+
+stats:
+	python print-stats.py download/{data,repos,lang}.txt
