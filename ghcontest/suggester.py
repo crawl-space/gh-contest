@@ -58,10 +58,10 @@ def suggest_repos(repos, popular_repos, users, target_user):
     for popular_repo in popular_repos:
         if not suggestions.could_add(popular_repo):
             continue
-#        elif len(fav_langs) > 0 and len(popular_repo.lang_names) > 0:
-#            lang_names = popular_repo.lang_names
-#            if len(fav_langs.intersection(lang_names)) < 1:
-#                continue
+        elif len(fav_langs) > 0 and len(popular_repo.lang_names) > 0:
+            lang_names = popular_repo.lang_names
+            if len(fav_langs.intersection(lang_names)) < 1:
+                continue
 
         suggestions.add(popular_repo, POPULAR)
         if len(suggestions) >= 60:
