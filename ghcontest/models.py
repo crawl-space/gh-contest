@@ -55,6 +55,13 @@ class Repo(IdBase):
 
         return self._lang_names
 
+    def is_related_to(self, repo):
+        if self.forked_from == repo:
+            return True
+        if repo in self.forked_by:
+            return True
+        return False
+
 
 class User(IdBase):
 
@@ -103,3 +110,9 @@ class User(IdBase):
                 similar += 1
         
         return similar/len(langs)
+
+    def related_to_watching(self, repo):
+        for arepo in self.watching:
+            if arepo.is_related_to(repo):
+                return True
+        return False
