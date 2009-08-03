@@ -5,9 +5,15 @@ class Suggestions(object):
     def __init__(self, user):
         self.user = user
         self.suggested_repos = {}
+        
+        self.fav_langs = set(user.favourite_langs)
 
     def could_add(self, repo):
-        return repo not in self.user.watching
+        if repo not in self.user.watching:
+            if len(self.fav_langs) > 0 and len(repo.lang_names) > 0:
+                if len(self.fav_langs.intersection(repo.lang_names)) < 1:
+                    return False
+            return True
 
     def add(self, repo, weight):
         if self.could_add(repo):
@@ -73,15 +79,9 @@ def suggest_repos(repos, popular_repos, users, target_user):
     if len(suggestions) < 10:
         fav_langs = set(target_user.favourite_langs)
         for popular_repo in popular_repos:
-            if not suggestions.could_add(popular_repo):
-                continue
-            elif len(fav_langs) > 0 and len(popular_repo.lang_names) > 0:
-                lang_names = popular_repo.lang_names
-                if len(fav_langs.intersection(lang_names)) < 1:
-                    continue
-
-            suggestions.add(popular_repo, POPULAR)
-            if len(suggestions) >= 10:
-                break
+            if suggestions.could_add(popular_repo):
+                suggestions.add(popular_repo, POPULAR)
+                if len(suggestions) >= 10:
+                    break
 
     return suggestions.top_ten()
