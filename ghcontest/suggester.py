@@ -67,7 +67,7 @@ def suggest_repos(repos, popular_repos, users, target_user):
 
     add_parents(suggestions, target_user)
     add_watched_owners(suggestions, target_user)
-#    add_children(suggestions, target_user)
+    add_children(suggestions, target_user)
 
     # pad with popular repos if we don't have 10 already
     if len(suggestions) < 10:
