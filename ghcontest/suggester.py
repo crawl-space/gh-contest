@@ -20,7 +20,7 @@ class Suggestions(object):
 
         def cmp_repos(r1, r2):
             if r1[1] == r2[1]:
-                if abs(r1[0].popularity - r2[0].popularity) <= 10:
+                if abs(r1[0].popularity - r2[0].popularity) <= 5:
                     return cmp(self.user.lang_pref_similarity(r1[0]),
                             self.user.lang_pref_similarity(r2[0]))
                 return cmp(r1[0].popularity, r2[0].popularity)
