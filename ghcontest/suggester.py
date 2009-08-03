@@ -66,12 +66,16 @@ def add_children(suggestions, target_user):
         for repo in parent_repo.forked_by:
             suggestions.add(repo, CHILD)
 
+superprojects = ['gnome', 'django', 'ruby', 'perl', 'rails']
+
 def add_superprojects(suggestions, target_user, repos):
     for watching in target_user.watching:
-        if 'gnome' in watching.name.lower():
-            for repo in repos:
-                if 'gnome' in repo.name.lower():
-                    suggestions.add(repo, SUPERPROJECT)
+        for superproject in superprojects:
+            if superproject in watching.name.lower():
+                for repo in repos:
+                    if superproject in repo.name.lower():
+                        suggestions.add(repo, SUPERPROJECT)
+                break
 
 def suggest_repos(repos, popular_repos, users, target_user):
     suggestions = Suggestions(target_user)
