@@ -37,9 +37,9 @@ class Suggestions(object):
         return len(self.suggested_repos)
 
 PARENT = 4
-USER = 2
+USER = 3
 CHILD = 1
-SUPERPROJECT = 3
+SUPERPROJECT = 4
 
 # just padding if we don't have enough
 POPULAR = 0
