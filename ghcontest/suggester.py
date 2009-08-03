@@ -26,33 +26,38 @@ class Suggestions(object):
     def __len__(self):
         return len(self.suggested_repos)
 
-FORKED = 4
+PARENT = 4
 USER = 3
 POPULAR = 2
+CHILD = 1
 
-def suggest_repos(repos, popular_repos, users, target_user):
-    suggestions = Suggestions(target_user)
-    similar_users = set()
-
+def add_parents(suggestions, target_user):
     parents = [repo.forked_from for repo in target_user.watching \
             if repo.forked_from != None]
-    parents.sort(key=lambda x: x.popularity, reverse=True)
     for parent in parents:
-        suggestions.add(parent, FORKED)
-        if len(suggestions) >= 20:
-            break
+        suggestions.add(parent, PARENT)
 
+def add_watched_owners(suggestions, target_user):
     watched_owners = [x.owner for x in target_user.watching]
     watched_owners = set(watched_owners)
     owned_by_watched_users = set()
     for watched_owner in watched_owners:
         owned_by_watched_users.update(watched_owner.owns)
     owned_by_watched_users = [x for x in owned_by_watched_users]
-    owned_by_watched_users.sort(key=lambda x: x.popularity, reverse=True)
     for repo in owned_by_watched_users:
         suggestions.add(repo, USER)
-        if len(suggestions) >= 40:
-            break
+
+def add_children(suggestions, target_user):
+    for parent_repo in target_user.watching:
+        for repo in parent_repo.forked_by:
+            suggestions.add(repo, CHILD)
+
+def suggest_repos(repos, popular_repos, users, target_user):
+    suggestions = Suggestions(target_user)
+
+    add_parents(suggestions, target_user)
+    add_watched_owners(suggestions, target_user)
+    add_children(suggestions, target_user)
 
     fav_langs = set(target_user.favourite_langs)
     for popular_repo in popular_repos:
