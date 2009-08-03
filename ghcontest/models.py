@@ -87,3 +87,19 @@ class User(IdBase):
 
         return self._favourite_langs
 
+    def lang_pref_similarity(self, repo):
+        """
+        Compare repo language makeup to this users language preferences.
+        Return: a value between 0 and 1, representing preference match, or None
+        if the user has no pref, or the repo has no known langs
+        """
+        langs = repo.langs
+        if not self.favourite_langs or not langs:
+            return None
+
+        similar = 0
+        for lang in langs:
+            if lang in self.favourite_langs:
+                similar += 1
+        
+        return similar/len(langs)
