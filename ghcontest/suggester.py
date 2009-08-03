@@ -9,12 +9,12 @@ class Suggestions(object):
     def could_add(self, repo):
         return repo not in self.user.watching
 
-    def add(self, repo):
+    def add(self, repo, weight):
         if self.could_add(repo):
             if repo not in self.suggested_repos:
-                self.suggested_repos[repo] = 1
+                self.suggested_repos[repo] = weight
             else:
-                self.suggested_repos[repo] += 1
+                self.suggested_repos[repo] += weight
 
     def top_ten(self):
         suggested_repos = self.suggested_repos.items()
@@ -26,6 +26,10 @@ class Suggestions(object):
     def __len__(self):
         return len(self.suggested_repos)
 
+FORKED = 4
+USER = 3
+POPULAR = 2
+
 def suggest_repos(repos, popular_repos, users, target_user):
     suggestions = Suggestions(target_user)
     similar_users = set()
@@ -34,7 +38,7 @@ def suggest_repos(repos, popular_repos, users, target_user):
             if repo.forked_from != None]
     parents.sort(key=lambda x: x.popularity, reverse=True)
     for parent in parents:
-        suggestions.add(parent)
+        suggestions.add(parent, FORKED)
         if len(suggestions) >= 20:
             break
 
@@ -46,7 +50,7 @@ def suggest_repos(repos, popular_repos, users, target_user):
     owned_by_watched_users = [x for x in owned_by_watched_users]
     owned_by_watched_users.sort(key=lambda x: x.popularity, reverse=True)
     for repo in owned_by_watched_users:
-        suggestions.add(repo)
+        suggestions.add(repo, USER)
         if len(suggestions) >= 40:
             break
 
@@ -59,7 +63,7 @@ def suggest_repos(repos, popular_repos, users, target_user):
             if len(fav_langs.intersection(lang_names)) < 1:
                 continue
 
-        suggestions.add(popular_repo)
+        suggestions.add(popular_repo, POPULAR)
         if len(suggestions) >= 60:
             break
 
