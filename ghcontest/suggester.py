@@ -39,6 +39,7 @@ class Suggestions(object):
 PARENT = 4
 USER = 3
 CHILD = 1
+SUPERPROJECT = 1
 
 # just padding if we don't have enough
 POPULAR = 0
@@ -64,6 +65,13 @@ def add_children(suggestions, target_user):
     for parent_repo in target_user.watching:
         for repo in parent_repo.forked_by:
             suggestions.add(repo, CHILD)
+
+def add_superprojects(suggestions, target_user, repos):
+    for watching in target_user.watching:
+        if 'gnome' in watching.name.lower():
+            for repo in repos:
+                if 'gnome' in repo.name.lower():
+                    suggestions.add(repo, SUPERPROJECT)
 
 def suggest_repos(repos, popular_repos, users, target_user):
     suggestions = Suggestions(target_user)
