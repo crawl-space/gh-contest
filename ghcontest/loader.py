@@ -10,6 +10,7 @@ def load_data(args):
     users = {}
     repos = {}
     popular_repos = []
+    superprojects = {}
 
     print "Loading user to repo map"
 
@@ -74,6 +75,15 @@ def load_data(args):
 
     repo_txt.close()
 
+    print "Grouping superprojects" 
+    superproject_keys = ['gnome', 'django', 'ruby', 'perl', 'rails']
+    for repo in repos.values():
+        for key in superproject_keys:
+            if key in repo.name.lower():
+                if key not in superprojects:
+                    superprojects[key] = []
+                superprojects[key].append(repo)
+
     print "Reading repo language"
     lang = open(args[2], 'r')
     for line in lang.readlines():
@@ -94,4 +104,4 @@ def load_data(args):
 
     print "Data read in %d seconds" % (time.time() - start_time)
 
-    return users, repos, popular_repos
+    return users, repos, popular_repos, superprojects

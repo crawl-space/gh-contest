@@ -9,7 +9,7 @@ from ghcontest.models import User
 
 def main(args):
     start_time = time.time()
-    users, repos, popular_repos = load_data(args)
+    users, repos, popular_repos, superprojects = load_data(args)
 
     print "Processing test users"
     test = open(args[3], 'r')
@@ -23,7 +23,8 @@ def main(args):
         else:
             user = users[user_id]
 
-        suggested_repos = suggest_repos(repos, popular_repos, users, user)
+        suggested_repos = suggest_repos(repos, popular_repos, users, user,
+                superprojects)
         suggested_repos.sort()
 
         results.write('%d:' % user.id)

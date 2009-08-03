@@ -67,24 +67,24 @@ def add_children(suggestions, target_user):
             suggestions.add(repo, CHILD)
 
 
-def add_superprojects(suggestions, target_user, repos):
-    superprojects = ['gnome', 'django', 'ruby', 'perl', 'rails']
+def add_superprojects(suggestions, target_user, superprojects):
     
     for watching in target_user.watching:
-        for superproject in superprojects:
+        for superproject in superprojects.keys():
             if superproject in watching.name.lower():
-                for repo in repos:
+                for repo in superprojects[superproject]:
                     if superproject in repo.name.lower():
-                        if not target_user.related_to_watching(repo):
-                            suggestions.add(repo, SUPERPROJECT)
+#                        if not target_user.related_to_watching(repo):
+                        suggestions.add(repo, SUPERPROJECT)
                 break
 
-def suggest_repos(repos, popular_repos, users, target_user):
+def suggest_repos(repos, popular_repos, users, target_user, superprojects):
     suggestions = Suggestions(target_user)
 
     add_parents(suggestions, target_user)
     add_watched_owners(suggestions, target_user)
     add_children(suggestions, target_user)
+    add_superprojects(suggestions, target_user, superprojects)
 
     # pad with popular repos if we don't have 10 already
     if len(suggestions) < 10:
