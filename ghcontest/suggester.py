@@ -35,7 +35,7 @@ class Suggestions(object):
 
 PARENT = 4
 USER = 3
-CHILD = 1
+CHILD = 2
 
 # just padding if we don't have enough
 POPULAR = 0
