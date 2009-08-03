@@ -19,10 +19,10 @@ class Suggestions(object):
     def top_ten(self):
 
         def cmp_repos(r1, r2):
-            if r1[0] == r2[0]:
-                return cmp(r1[1].popularity, r2[1].popularity)
+            if r1[1] == r2[1]:
+                return cmp(r1[0].popularity, r2[0].popularity)
             else:
-                return cmp(r1[0], r2[0])
+                return cmp(r1[1], r2[1])
 
         suggested_repos = self.suggested_repos.items()
         suggested_repos.sort(reverse=True, cmp=cmp_repos)
