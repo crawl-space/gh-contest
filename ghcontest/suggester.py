@@ -36,10 +36,10 @@ class Suggestions(object):
     def __len__(self):
         return len(self.suggested_repos)
 
-PARENT = 3
-USER = 2
+PARENT = 2
+USER = 1
 CHILD = 1
-SUPERPROJECT = 4
+SUPERPROJECT = 2
 
 # just padding if we don't have enough
 POPULAR = 0
