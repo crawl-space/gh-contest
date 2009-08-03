@@ -17,8 +17,15 @@ class Suggestions(object):
                 self.suggested_repos[repo] += weight
 
     def top_ten(self):
+
+        def cmp_repos(r1, r2):
+            if r1[0] == r2[0]:
+                return cmp(r1[1].popularity, r2[1].popularity)
+            else:
+                return cmp(r1[0], r2[0])
+
         suggested_repos = self.suggested_repos.items()
-        suggested_repos.sort(reverse=True, key=lambda x: x[1])
+        suggested_repos.sort(reverse=True, cmp=cmp_repos)
         top_ten = [x[0] for x in suggested_repos]
 
         return top_ten[:10]
@@ -28,8 +35,11 @@ class Suggestions(object):
 
 PARENT = 4
 USER = 3
-POPULAR = 2
-CHILD = 1
+CHILD = 2
+
+# just padding if we don't have enough
+POPULAR = 0
+
 
 def add_parents(suggestions, target_user):
     parents = [repo.forked_from for repo in target_user.watching \
@@ -59,17 +69,19 @@ def suggest_repos(repos, popular_repos, users, target_user):
     add_watched_owners(suggestions, target_user)
     add_children(suggestions, target_user)
 
-    fav_langs = set(target_user.favourite_langs)
-    for popular_repo in popular_repos:
-        if not suggestions.could_add(popular_repo):
-            continue
-        elif len(fav_langs) > 0 and len(popular_repo.lang_names) > 0:
-            lang_names = popular_repo.lang_names
-            if len(fav_langs.intersection(lang_names)) < 1:
+    # pad with popular repos if we don't have 10 already
+    if len(suggestions) < 10:
+        fav_langs = set(target_user.favourite_langs)
+        for popular_repo in popular_repos:
+            if not suggestions.could_add(popular_repo):
                 continue
+            elif len(fav_langs) > 0 and len(popular_repo.lang_names) > 0:
+                lang_names = popular_repo.lang_names
+                if len(fav_langs.intersection(lang_names)) < 1:
+                    continue
 
-        suggestions.add(popular_repo, POPULAR)
-        if len(suggestions) >= 60:
-            break
+            suggestions.add(popular_repo, POPULAR)
+            if len(suggestions) >= 10:
+                break
 
     return suggestions.top_ten()
