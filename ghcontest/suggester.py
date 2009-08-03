@@ -4,16 +4,27 @@ class Suggestions(object):
 
     def __init__(self, user):
         self.user = user
-        self.suggested_repos = []
+        self.suggested_repos = {}
 
     def could_add(self, repo):
-        return repo not in self.user.watching and \
-                repo not in self.suggested_repos
+        return repo not in self.user.watching
 
     def add(self, repo):
         if self.could_add(repo):
-            self.suggested_repos.append(repo)
+            if repo not in self.suggested_repos:
+                self.suggested_repos[repo] = 1
+            else:
+                self.suggested_repos[repo] += 1
 
+    def top_ten(self):
+        suggested_repos = self.suggested_repos.items()
+        suggested_repos.sort(reverse=True, key=lambda x: x[1])
+        top_ten = [x[0] for x in suggested_repos]
+
+        return top_ten[:10]
+
+    def __len__(self):
+        return len(self.suggested_repos)
 
 def suggest_repos(repos, popular_repos, users, target_user):
     suggestions = Suggestions(target_user)
@@ -24,8 +35,8 @@ def suggest_repos(repos, popular_repos, users, target_user):
     parents.sort(key=lambda x: x.popularity, reverse=True)
     for parent in parents:
         suggestions.add(parent)
-        if len(suggestions.suggested_repos) >= 10:
-            return suggestions.suggested_repos
+        if len(suggestions) >= 20:
+            break
 
     watched_owners = [x.owner for x in target_user.watching]
     watched_owners = set(watched_owners)
@@ -36,8 +47,8 @@ def suggest_repos(repos, popular_repos, users, target_user):
     owned_by_watched_users.sort(key=lambda x: x.popularity, reverse=True)
     for repo in owned_by_watched_users:
         suggestions.add(repo)
-        if len(suggestions.suggested_repos) >= 10:
-            return suggestions.suggested_repos
+        if len(suggestions) >= 40:
+            break
 
     fav_langs = set(target_user.favourite_langs)
     for popular_repo in popular_repos:
@@ -49,8 +60,7 @@ def suggest_repos(repos, popular_repos, users, target_user):
                 continue
 
         suggestions.add(popular_repo)
-        if len(suggestions.suggested_repos) >= 10:
-            return suggestions.suggested_repos
+        if len(suggestions) >= 60:
+            break
 
-    # something went wrong
-    return []
+    return suggestions.top_ten()
