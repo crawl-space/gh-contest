@@ -37,6 +37,7 @@ class Suggestions(object):
         return len(self.suggested_repos)
 
 PARENT = 4
+ANCESTOR = 3
 USER = 2
 CHILD = 2
 SUPERPROJECT = 1
@@ -50,6 +51,13 @@ def add_parents(suggestions, target_user):
             if repo.forked_from != None]
     for parent in parents:
         suggestions.add(parent, PARENT)
+
+def add_ancestors(suggestions, target_user):
+    parents = [repo.forked_from for repo in target_user.watching \
+            if repo.forked_from != None]
+    for parent in parents:
+        for ancestor in parent.ancestors:
+            suggestions.add(ancestor, ANCESTOR)
 
 def add_watched_owners(suggestions, target_user):
     watched_owners = [x.owner for x in target_user.watching]
@@ -82,9 +90,11 @@ def suggest_repos(repos, popular_repos, users, target_user, superprojects):
     suggestions = Suggestions(target_user)
 
     add_parents(suggestions, target_user)
+    add_ancestors(suggestions, target_user)
     add_watched_owners(suggestions, target_user)
     add_children(suggestions, target_user)
 #    add_superprojects(suggestions, target_user, superprojects)
+
 
     # pad with popular repos if we don't have 10 already
     if len(suggestions) < 10:

@@ -62,6 +62,13 @@ class Repo(IdBase):
             return True
         return False
 
+    @property
+    def ancestors(self):
+        if self.forked_from != None:
+            return [self.forked_from] + self.forked_from.ancestors
+
+        else:
+            return []
 
 class User(IdBase):
 
