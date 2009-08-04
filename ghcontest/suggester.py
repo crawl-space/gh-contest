@@ -40,7 +40,7 @@ PARENT = 4
 ANCESTOR = 4
 USER = 2
 CHILD = 2
-SIMILAR = 1
+SIMILAR = 2
 SUPERPROJECT = 1
 
 # just padding if we don't have enough
