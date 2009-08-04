@@ -37,7 +37,7 @@ class Suggestions(object):
         return len(self.suggested_repos)
 
 PARENT = 4
-ANCESTOR = 3
+ANCESTOR = 4
 USER = 2
 CHILD = 2
 SUPERPROJECT = 1
