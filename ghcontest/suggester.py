@@ -40,6 +40,7 @@ PARENT = 4
 ANCESTOR = 4
 USER = 2
 CHILD = 2
+SIMILAR = 1
 SUPERPROJECT = 1
 
 # just padding if we don't have enough
@@ -74,9 +75,21 @@ def add_children(suggestions, target_user):
         for repo in parent_repo.forked_by:
             suggestions.add(repo, CHILD)
 
+def add_repos_from_similar_users(suggestions, target_user):
+    repos = set()
+    users = set()
+    for repo in target_user.watching:
+        for user in repo.watched_by:
+            if user != target_user:
+                users.add(user)
+    for user in users:
+        for repo in user.watching:
+            repos.add(repo)
+    for repo in repos:
+        suggestions.add(repo, SIMILAR)
+
 
 def add_superprojects(suggestions, target_user, superprojects):
-    
     for watching in target_user.watching:
         for superproject in superprojects.keys():
             if superproject in watching.name.lower():
@@ -93,6 +106,7 @@ def suggest_repos(repos, popular_repos, users, target_user, superprojects):
     add_ancestors(suggestions, target_user)
     add_watched_owners(suggestions, target_user)
     add_children(suggestions, target_user)
+    add_repos_from_similar_users(suggestions, target_user)
 #    add_superprojects(suggestions, target_user, superprojects)
 
 

@@ -30,6 +30,7 @@ def main(args):
         results.write('%d:' % user.id)
         results.write(','.join([str(x.id) for x in suggested_repos]))
         results.write('\n')
+        results.flush()
 
     test.close()
     results.close()
