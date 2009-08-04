@@ -38,7 +38,7 @@ class Suggestions(object):
 
 PARENT = 4
 USER = 2
-CHILD = 1
+CHILD = 2
 SUPERPROJECT = 1
 
 # just padding if we don't have enough
