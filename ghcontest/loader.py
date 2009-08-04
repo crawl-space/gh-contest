@@ -75,14 +75,14 @@ def load_data(args):
 
     repo_txt.close()
 
-    print "Grouping superprojects" 
-    superproject_keys = ['gnome', 'django', 'ruby', 'perl', 'rails']
-    for repo in repos.values():
-        for key in superproject_keys:
-            if key in repo.name.lower():
-                if key not in superprojects:
-                    superprojects[key] = []
-                superprojects[key].append(repo)
+#    print "Grouping superprojects" 
+#    superproject_keys = ['gnome', 'django', 'ruby', 'perl', 'rails']
+#    for repo in repos.values():
+#        for key in superproject_keys:
+#            if key in repo.name.lower():
+#                if key not in superprojects:
+#                    superprojects[key] = []
+#                superprojects[key].append(repo)
 
     print "Reading repo language"
     lang = open(args[2], 'r')
