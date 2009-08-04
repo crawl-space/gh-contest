@@ -38,8 +38,8 @@ class Suggestions(object):
 
 PARENT = 5
 ANCESTOR = 4
-USER = 3
-CHILD = 2
+USER = 1
+CHILD = 1
 SUPERPROJECT = 1
 
 # just padding if we don't have enough
